@@ -1,29 +1,32 @@
 package model;
 
-import io.DataReader;
-import model.Book;
-
 public class Library {
 
-    private static final int MAX_BOOKS = 1000;
-    private Book[] books = new Book[MAX_BOOKS];
-    private int booksNumber;
+    private static final int MAX_PUBLICATIONS = 2000;
+    private Publication[] publications = new Publication[MAX_PUBLICATIONS];
+    private int publicationsNumber;
+
+    public Publication[] getPublications() {
+        Publication[] result = new Publication[publicationsNumber];
+        for (int i = 0; i < publicationsNumber; i++) {
+            result[i] = publications[i];
+        }
+        return result;
+    }
 
     public void addBook(Book book) {
-        if (booksNumber < MAX_BOOKS) {
-            books[booksNumber] = book;
-            booksNumber++;
-        } else {
-            System.out.println("The maximum number of books has been reached");
-        }
+        addPublication(book);
+    }
+    public void addMagazine(Magazine magazine) {
+        addPublication(magazine);
     }
 
-    public void printBooks() {
-        if (booksNumber == 0) {
-            System.out.println("There is no books in the Library");
+    private void addPublication(Publication pub) {
+        if (publicationsNumber >= MAX_PUBLICATIONS) {
+            throw new ArrayIndexOutOfBoundsException("Max publications exceed " + MAX_PUBLICATIONS);
         }
-        for (int i = 0; i < booksNumber; i++) {
-            books[i].printInfo();
-        }
+        publications[publicationsNumber] = pub;
+        publicationsNumber++;
     }
+
 }
