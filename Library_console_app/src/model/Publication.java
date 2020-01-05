@@ -1,8 +1,9 @@
 package model;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Publication {
+public abstract class Publication implements Serializable {
     private int year;
     private String title;
     private String publisher;
@@ -39,12 +40,12 @@ public class Publication {
 
      @Override
      public String toString() {
-         return "Publication{" +
-                 "year=" + year +
-                 ", title='" + title + '\'' +
-                 ", publisher='" + publisher + '\'' +
-                 '}';
+         return "title: " + title + "\n" +
+                 "publisher: " + publisher + "\n" +
+                 "year: " + year + "\n";
      }
+
+    public abstract String toCsv();
 
     @Override
     public boolean equals(Object o) {

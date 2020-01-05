@@ -1,6 +1,7 @@
 package model;
 
 public class Magazine extends Publication {
+    public static final String TYPE = "Magazine";
     private int month;
     private int day;
     private String language;
@@ -38,11 +39,21 @@ public class Magazine extends Publication {
 
     @Override
     public String toString() {
-        return "Magazine{" +
-                "month=" + month +
-                ", day=" + day +
-                ", language='" + language + '\'' +
-                '}';
+        return "title: " + getTitle() + "\n" +
+                "publisher: " + getPublisher() + "\n" +
+                "date: " + day + "." + month + "." + getYear() + "\n" +
+                "language: " + language + "\n";
+    }
+
+    @Override
+    public String toCsv() {
+        return (TYPE + ";") +
+                getTitle() + ";" +
+                getPublisher() + ";" +
+                getYear() + ";" +
+                month + ";" +
+                day + ";" +
+                language + "";
     }
 
 }
