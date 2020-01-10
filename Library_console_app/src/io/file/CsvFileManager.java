@@ -44,10 +44,10 @@ public class CsvFileManager implements FileManager {
         }
 
     }
-
+    // used for importing data
     private Publication createObjectFromString(String csvText) {
-        String[] split = csvText.split(";");
-        String type = split[0];
+        String[] split = csvText.split(","); // default separator
+        String type = split[0]; // determine: is pub. a book or magazine
         if(Book.TYPE.equals(type)) {
             return createBook(split);
         } else if(Magazine.TYPE.equals(type)) {

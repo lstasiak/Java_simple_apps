@@ -27,7 +27,7 @@ public class ConsolePrinter {
             }
         }
         if (counter == 0) {
-            printLine("There is no books in the library");
+            printLine("There is no magazines in the library");
         }
     }
     public void printLine(String text) {

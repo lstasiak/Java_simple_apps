@@ -12,7 +12,10 @@ import model.Book;
 import model.Library;
 import model.Magazine;
 import model.Publication;
+import model.comparator.AlphabeticalTitleComparator;
+import model.comparator.DateComparator;
 
+import java.util.Arrays;
 import java.util.InputMismatchException;
 
 public class LibraryControl {
@@ -27,7 +30,7 @@ public class LibraryControl {
         fileManager = new FileManagerBuilder(printer, dataReader).build();
         try {
             library = fileManager.importData();
-            printer.printLine("Imported data from file.");
+            printer.printLine("Data from the file has been imported");
         } catch (DataImportException | InvalidDataException e) {
             printer.printLine(e.getMessage());
             printer.printLine("A new base has been initiated.");
@@ -54,6 +57,12 @@ public class LibraryControl {
                 case PRINT_MAGAZINES:
                     printMagazines();
                     break;
+                case DELETE_BOOK:
+                    deleteBook();
+                    break;
+                case DELETE_MAGAZINE:
+                    deleteMagazine();
+                    break;
                 case EXIT:
                     exit();
                     break;
@@ -70,9 +79,9 @@ public class LibraryControl {
                 option = Option.createFromInt(dataReader.getInt());
                 optionOk = true;
             } catch (NoSuchOptionException e) {
-                printer.printLine(e.getMessage() + ", enter again: ");
+                printer.printLine(e.getMessage() + ", try again: ");
             } catch (InputMismatchException ignored) {
-                printer.printLine("The value is not a number, enter again: ");
+                printer.printLine("The value is not a number, try again: ");
             }
         }
         return option;
@@ -97,10 +106,9 @@ public class LibraryControl {
     }
 
     private void printBooks() {
-        Publication[] publications = library.getPublications();
+        Publication[] publications = getSortedPublications();
         printer.printBooks(publications);
     }
-
 
     private void addMagazine() {
         try {
@@ -114,10 +122,32 @@ public class LibraryControl {
     }
 
     private void printMagazines() {
-        Publication[] publications = library.getPublications();
+        Publication[] publications = getSortedPublications();
         printer.printMagazines(publications);
     }
+    private void deleteMagazine() {
+        try {
+            Magazine magazine = dataReader.readAndCreateMagazine();
+            if (library.removePublication(magazine))
+                printer.printLine("The magazine has been removed.");
+            else
+                printer.printLine("There is no such magazine.");
+        } catch (InputMismatchException e) {
+            printer.printLine("Failed to create a magazine, invalid data");
+        }
+    }
 
+    private void deleteBook() {
+        try {
+            Book book = dataReader.readAndCreateBook();
+            if (library.removePublication(book))
+                printer.printLine("The book has been removed.");
+            else
+                printer.printLine("There is no such book.");
+        } catch (InputMismatchException e) {
+            printer.printLine("Failed to create a book, invalid data");
+        }
+    }
     private void exit() {
         try {
             fileManager.exportData(library);
@@ -129,12 +159,38 @@ public class LibraryControl {
         dataReader.close();
     }
 
+    private Publication[] getSortedPublications() {
+        Publication[] publications = library.getPublications();
+
+        printer.printLine("Select the sorting method:");
+        printer.printLine("alphabetical - " + 1);
+        printer.printLine("by date - " + 2);
+        int optionS = dataReader.getInt();
+
+        boolean chosen = false;
+        do {
+            if (optionS == 1){
+                Arrays.sort(publications, new AlphabeticalTitleComparator());
+                chosen = true;
+            } else if (optionS == 2) {
+                Arrays.sort(publications, new DateComparator());
+                chosen = true;
+            } else
+                System.out.println("Wrong option. Enter a number: 1 or 2");
+
+        } while(!chosen);
+
+        return publications;
+    }
+
     private enum Option {
         EXIT(0, "Exit the library"),
         ADD_BOOK(1, "Add the book to the library"),
         ADD_MAGAZINE(2,"Add the magazine to the library"),
         PRINT_BOOKS(3, "Print valid books"),
-        PRINT_MAGAZINES(4, "Print valid magazines");
+        PRINT_MAGAZINES(4, "Print valid magazines"),
+        DELETE_BOOK(5, "Delete a book"),
+        DELETE_MAGAZINE(6, "Delete a magazine");
 
         private int value;
         private String description;

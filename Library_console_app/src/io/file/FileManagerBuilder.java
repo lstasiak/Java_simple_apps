@@ -12,10 +12,10 @@ public class FileManagerBuilder {
         this.printer = printer;
         this.reader = reader;
     }
-    // create and return a SerializableFileManager object
+    // create and return CsvFileManager and SerializableFileManager objects
     public FileManager build() {
         printer.printLine("Select a data format:");
-        FileType fileType = getFileType();
+        FileType fileType = getFileType(); // enum
         switch (fileType) {
             case CSV:
                 return new CsvFileManager();
@@ -25,7 +25,7 @@ public class FileManagerBuilder {
                 throw new NoSuchFileTypeException("Unsupported data type");
         }
     }
-    // convert loaded String into type FileType
+    // converts loaded String into type FileType
     private FileType getFileType() {
         boolean typeOk = false;
         FileType result = null;
