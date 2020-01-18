@@ -1,24 +1,25 @@
 package model;
 
 import java.io.Serializable;
+import java.time.Year;
 import java.util.Objects;
 
-public abstract class Publication implements Serializable, Comparable<Publication> {
-    private int year;
+public abstract class Publication implements Serializable, Comparable<Publication>, CsvConvertible {
+    private Year year;
     private String title;
     private String publisher;
 
     public Publication(String title, String publisher, int year) {
-        this.year = year;
+        this.year = Year.of(year);
         this.title = title;
         this.publisher = publisher;
     }
 
-    public int getYear() {
+    public Year getYear() {
         return year;
     }
 
-    void setYear(int year) {
+    public void setYear(Year year) {
         this.year = year;
     }
 
@@ -26,15 +27,15 @@ public abstract class Publication implements Serializable, Comparable<Publicatio
         return title;
     }
 
-    void setTitle(String title) {
+    public void setTitle(String title) {
         this.title = title;
     }
 
-    String getPublisher() {
+    public String getPublisher() {
         return publisher;
     }
 
-    void setPublisher(String publisher) {
+    public void setPublisher(String publisher) {
         this.publisher = publisher;
     }
 
@@ -44,8 +45,6 @@ public abstract class Publication implements Serializable, Comparable<Publicatio
                  "publisher: " + publisher + "\n" +
                  "year: " + year + "\n";
      }
-    // Writing data to csv
-    public abstract String toCsv();
 
     @Override
     public boolean equals(Object o) {

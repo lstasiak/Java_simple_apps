@@ -1,22 +1,15 @@
 package app;
 
-import exception.DataExportException;
-import exception.DataImportException;
-import exception.InvalidDataException;
-import exception.NoSuchOptionException;
+import exception.*;
 import io.ConsolePrinter;
 import io.DataReader;
 import io.file.FileManager;
 import io.file.FileManagerBuilder;
-import model.Book;
-import model.Library;
-import model.Magazine;
-import model.Publication;
+import model.*;
 import model.comparator.AlphabeticalTitleComparator;
 import model.comparator.DateComparator;
 
-import java.util.Arrays;
-import java.util.InputMismatchException;
+import java.util.*;
 
 public class LibraryControl {
 
@@ -63,11 +56,20 @@ public class LibraryControl {
                 case DELETE_MAGAZINE:
                     deleteMagazine();
                     break;
+                case ADD_USER: //dodano
+                    addUser();
+                    break;
+                case PRINT_USERS: //dodano
+                    printUsers();
+                    break;
+                case FIND_BOOK:
+                    findBook();
+                    break;
                 case EXIT:
                     exit();
                     break;
                 default:
-                    System.out.println("Wrong option. Enter the number again: ");
+                    System.out.println("Wrong option. Try again: ");
             }
         } while(option != Option.EXIT);
     }
@@ -106,8 +108,7 @@ public class LibraryControl {
     }
 
     private void printBooks() {
-        Publication[] publications = getSortedPublications();
-        printer.printBooks(publications);
+        printer.printBooks(selectAndSort());
     }
 
     private void addMagazine() {
@@ -117,14 +118,30 @@ public class LibraryControl {
         } catch (InputMismatchException e) {
             printer.printLine("Couldn't create a magazine, incorrect data");
         } catch (ArrayIndexOutOfBoundsException e) {
-            printer.printLine("Capacity limit reached, you cannot add another magazine");
+            printer.printLine("Capacity limit has reached, you cannot add another magazine");
         }
     }
 
     private void printMagazines() {
-        Publication[] publications = getSortedPublications();
-        printer.printMagazines(publications);
+        printer.printMagazines(selectAndSort());
     }
+
+    private void addUser() {
+        LibraryUser libraryUser = dataReader.createLibraryUser();
+        try {
+            library.addUser(libraryUser);
+        } catch (UserAlreadyExistsException e) {
+            printer.printLine(e.getMessage());
+        }
+    }
+
+    private void printUsers() {
+        printer.printUsers(library.getSortedUsers(
+                // sort by last name (alphabetical order)
+                Comparator.comparing(User::getLastName, String.CASE_INSENSITIVE_ORDER)
+        ));
+    }
+
     private void deleteMagazine() {
         try {
             Magazine magazine = dataReader.readAndCreateMagazine();
@@ -148,6 +165,15 @@ public class LibraryControl {
             printer.printLine("Failed to create a book, invalid data");
         }
     }
+    private void findBook() {
+        printer.printLine("Enter the title of the publication:");
+        String title = dataReader.getString();
+        String notFoundMessage = "There is no such publication";
+        library.findPublicationByTitle(title)
+                .map(Publication::toString)
+                .ifPresentOrElse(System.out::println, () -> System.out.println(notFoundMessage));
+    }
+
     private void exit() {
         try {
             fileManager.exportData(library);
@@ -159,30 +185,6 @@ public class LibraryControl {
         dataReader.close();
     }
 
-    private Publication[] getSortedPublications() {
-        Publication[] publications = library.getPublications();
-
-        printer.printLine("Select the sorting method:");
-        printer.printLine("alphabetical - " + 1);
-        printer.printLine("by date - " + 2);
-        int optionS = dataReader.getInt();
-
-        boolean chosen = false;
-        do {
-            if (optionS == 1){
-                Arrays.sort(publications, new AlphabeticalTitleComparator());
-                chosen = true;
-            } else if (optionS == 2) {
-                Arrays.sort(publications, new DateComparator());
-                chosen = true;
-            } else
-                System.out.println("Wrong option. Enter a number: 1 or 2");
-
-        } while(!chosen);
-
-        return publications;
-    }
-
     private enum Option {
         EXIT(0, "Exit the library"),
         ADD_BOOK(1, "Add the book to the library"),
@@ -190,7 +192,10 @@ public class LibraryControl {
         PRINT_BOOKS(3, "Print valid books"),
         PRINT_MAGAZINES(4, "Print valid magazines"),
         DELETE_BOOK(5, "Delete a book"),
-        DELETE_MAGAZINE(6, "Delete a magazine");
+        DELETE_MAGAZINE(6, "Delete a magazine"),
+        ADD_USER(7, "Add reader"),
+        PRINT_USERS(8, "Print readers"),
+        FIND_BOOK(9, "Search for a book");
 
         private int value;
         private String description;
@@ -212,6 +217,35 @@ public class LibraryControl {
                 throw new NoSuchOptionException("There is no option with id " + option);
             }
         }
+    }
+
+    // pick a sorting type and return sorted publications
+    private Collection<Publication> selectAndSort() {
+        printer.printLine("Select sorting method: ");
+        printer.printLine("1 - alphabetical order");
+        printer.printLine("2 - sort by date");
+        String option = null;
+        boolean ischosen = false;
+        Collection<Publication> sortedPublication = null;
+        do {
+            try {
+                option = dataReader.getString();
+                if (option.equals("1")) {
+                    ischosen = true;
+                    sortedPublication = library.getSortedPublications(new AlphabeticalTitleComparator());
+                    return sortedPublication;
+                } else if (option.equals("2")){
+                    ischosen = true;
+                    sortedPublication = library.getSortedPublications(new DateComparator());
+                    return sortedPublication;
+                } else {
+                    throw new InputMismatchException();
+                }
+            } catch (InputMismatchException e) {
+                printer.printLine("Wrong option. Type \"1\" or \"2\" ");
+            }
+        } while (!ischosen);
+        return sortedPublication;
     }
 
 }

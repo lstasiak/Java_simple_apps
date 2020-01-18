@@ -1,32 +1,24 @@
 package model;
 
+import java.time.MonthDay;
+
 public class Magazine extends Publication {
     public static final String TYPE = "Magazine";
-    private int month;
-    private int day;
+    private MonthDay monthDay;
     private String language;
 
     public Magazine(String title, String publisher, String language, int year, int month, int day) {
         super(title, publisher, year);
-        this.month = month;
-        this.day = day;
+        this.monthDay = MonthDay.of(month, day);
         this.language = language;
     }
 
-    public int getMonth() {
-        return month;
+    public MonthDay getMonthDay() {
+        return monthDay;
     }
 
-    public void setMonth(int month) {
-        this.month = month;
-    }
-
-    public int getDay() {
-        return day;
-    }
-
-    public void setDay(int day) {
-        this.day = day;
+    public void setMonthDay(MonthDay monthDay) {
+        this.monthDay = monthDay;
     }
 
     public String getLanguage() {
@@ -41,7 +33,7 @@ public class Magazine extends Publication {
     public String toString() {
         return "title: " + getTitle() + "\n" +
                 "publisher: " + getPublisher() + "\n" +
-                "date: " + day + "." + month + "." + getYear() + "\n" +
+                "date: " + monthDay.getDayOfMonth() + "-" + monthDay.getMonthValue() + "-" + getYear() + "\n" +
                 "language: " + language + "\n";
     }
 
@@ -51,8 +43,8 @@ public class Magazine extends Publication {
                 getTitle() + "," +
                 getPublisher() + "," +
                 getYear() + "," +
-                month + "," +
-                day + "," +
+                monthDay.getMonthValue() + "," +
+                monthDay.getDayOfMonth() + "," +
                 language + "";
     }
 
